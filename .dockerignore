@@ -1,0 +1,53 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+venv/
+.git/
+.devcontainer/
+data/
+exports/
+*.parquet
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entornos
+venv/
+.env
+.env.*
+.venv/
+
+# Git y tooling
+.git/
+.devcontainer/
+
+# Datos pesados (CRÍTICO en tu caso)
+data/
+exports/
+*.parquet
+
+# Logs
+*.log
+
+# IDEs
+.vscode/
+.idea/
+
+# Docker / build basura
+Dockerfile*
+docker-compose*.yml
+
+# Cache de tests
+.pytest_cache/
+.mypy_cache/
+.coverage
+
+# Archivos temporales
+*.tar.gz
+*.zip
+*.tmp

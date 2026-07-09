@@ -1,0 +1,107 @@
+services:
+
+  app:
+    build: .
+    container_name: archpat-nitrous
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - minio
+      - postgres
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      #MINIO_ENDPOINT: minio:9000
+      #MINIO_ACCESS_KEY: minioadmin
+      #MINIO_SECRET_KEY: minioadmin
+      #MINIO_BUCKET: exports
+
+      MINIO_ENDPOINT: 10.10.119.104:9000
+      MINIO_ACCESS_KEY: desarrollo
+      MINIO_SECRET_KEY: Previ.2024**
+      MINIO_BUCKET: silver
+
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+
+    env_file:
+      - .env
+  
+  redis:
+    image: redis:7
+    container_name: redis
+    ports: 
+      - "6379:6379"
+  
+  worker: 
+    build: .
+    volumes:
+      - .:/app
+    container_name: rq_worker
+    #command: rq worker --url redis://redis:6379
+    command: python -m app.workers.worker
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      #MINIO_ENDPOINT: minio:9000
+      #MINIO_ACCESS_KEY: minioadmin
+      #MINIO_SECRET_KEY: minioadmin
+      #MINIO_BUCKET: exports
+
+      MINIO_ENDPOINT: 10.10.119.104:9000
+      MINIO_ACCESS_KEY: desarrollo
+      MINIO_SECRET_KEY: Previ.2024**
+      MINIO_BUCKET: silver
+
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+    env_file:
+      - .env
+  
+  postgres:
+    image: postgres:17
+    container_name: postgres_db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: app_db
+      POSTGRES_USER: app_user
+      POSTGRES_PASSWORD: app_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio_server
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      #MINIO_ROOT_USER: minioadmin
+      #MINIO_ROOT_PASSWORD: minioadmin
+
+      MINIO_ROOT_USER: desarrollo
+      MINIO_ROOT_PASSWORD: Previ.2024**
+    volumes:
+      - ./data:/data
+      - ./config:/root/.minio
+    command: server /data --console-address ":9001"
+    restart: always
+
+volumes:
+  postgres_data:

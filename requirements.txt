@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+redis
+rq
+minio==7.2.20
+numpy
+pandas
+duckdb
+duckdb-engine
+duckdb[httpfs]
+polars
+pyarrow
+xlsxwriter
+sqlalchemy
+psycopg[binary]
+python-dotenv
