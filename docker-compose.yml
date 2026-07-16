@@ -5,6 +5,7 @@ services:
     container_name: archpat-nitrous
     ports:
       - "8080:8080"
+      #- "7070:7070"
     volumes:
       - .:/app
     depends_on:
@@ -12,6 +13,7 @@ services:
       - minio
       - postgres
     environment:
+      PYTHONUNBUFFERED: "1"
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
@@ -51,6 +53,7 @@ services:
       - redis
       - postgres
     environment:
+      PYTHONUNBUFFERED: "1"
       REDIS_HOST: redis
       REDIS_PORT: 6379
 
@@ -77,13 +80,15 @@ services:
     container_name: postgres_db
     restart: always
     ports:
-      - "5432:5432"
+      #- "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_DB: app_db
       POSTGRES_USER: app_user
       POSTGRES_PASSWORD: app_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      #- ./init-scripts:/docker-entrypoint-initdb.d
   
   minio:
     image: quay.io/minio/minio:latest

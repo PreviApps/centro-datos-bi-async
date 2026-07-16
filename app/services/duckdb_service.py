@@ -5,6 +5,7 @@ import json
 import numpy as np
 import pandas as pd
 import polars as pl
+import os
 from app.core.duckdb_client import con
 
 class DuckDBService:
@@ -254,6 +255,46 @@ class DuckDBService:
             "columns": df.width,
             "path": output_path
         }
+    
+    ##### LA NUEVA FUNCIÓN PARA LA CONSULTA    
+    @staticmethod
+    def execute_query_to_parquet(
+        query: str,
+        params: dict,
+        output_path: str
+    ):
+        from app.core.duckdb_factory import create_connection
+
+        DuckDBService.validate_query(query)
+
+        query = DuckDBService.replace_parquet_paths(query)
+
+        print("QUERY OME", query)
+
+        con = create_connection()
+
+        try:
+
+            copy_sql = f"""
+            COPY (
+                {query}
+            )
+            TO '{output_path}'
+            (
+                FORMAT PARQUET,
+                COMPRESSION ZSTD
+            );
+            """
+
+            con.execute(copy_sql, params)
+
+            return {
+                "path": output_path,
+                "size": os.path.getsize(output_path)
+            }
+
+        finally:
+            con.close()
 
     @staticmethod
     def _serializable_dataframe(df: pd.DataFrame) -> list:

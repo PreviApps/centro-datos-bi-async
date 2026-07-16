@@ -94,7 +94,8 @@ class ReportsService:
 
         rq_job = queue.enqueue(
             execute_report_job,
-            str(job.id)
+            str(job.id),
+            job_timeout=3600
         )
 
         return {

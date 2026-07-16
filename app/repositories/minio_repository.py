@@ -114,7 +114,7 @@ class MinioRepository:
 
             return {
                 "object_name": object_name,
-                #"url": client.presigned_get_object(BUCKET, object_name, expires=timedelta(minutes=5))
+                "url": client.presigned_get_object(BUCKET, object_name, expires=timedelta(minutes=5))
             }
 
         except Exception as e:

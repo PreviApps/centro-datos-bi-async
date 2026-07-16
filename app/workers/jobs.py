@@ -7,6 +7,7 @@ from app.core.database_client import SessionLocal
 from app.core.duckdb_client import initialize_duckdb
 from app.repositories.reports_jobs_repository import ReportJobsRepository
 from app.repositories.reports_repository import ReportsRepository
+from app.services.parquet_service import ParquetService
 from app.services.report_query_builder import ReportQueryBuilder
 from app.services.duckdb_service import DuckDBService
 from app.repositories.minio_repository import MinioRepository
@@ -27,8 +28,8 @@ def execute_report_job(job_id: str):
     reports_repo = ReportsRepository(db)
     minio_repo = MinioRepository()
 
-    temp_path = None
-    object_name = None
+    parquet_temp = None
+    excel_temp = None
 
     try:
 
@@ -47,32 +48,60 @@ def execute_report_job(job_id: str):
 
         # 🔴 POR AHORA: ejecución simple (sin export aún)
         with tempfile.NamedTemporaryFile(
+            #suffix=".xlsx",
+            suffix=".parquet",
+            delete=False
+        ) as tmp:
+
+            parquet_temp = tmp.name
+
+        #result = DuckDBService.export_query_to_excel(
+        parquet_result = DuckDBService.execute_query_to_parquet(
+            compiled["query"],
+            compiled["params"],
+            parquet_temp
+        )
+
+        print("PARQUET GENERATED:", parquet_result)
+
+        jobs_repo.update(job_id, {
+            "status": "parquet_generated",
+            "started_at": datetime.utcnow()
+        })
+
+        with tempfile.NamedTemporaryFile(
             suffix=".xlsx",
             delete=False
         ) as tmp:
 
-            temp_path = tmp.name
-
-        result = DuckDBService.export_query_to_excel(
-            compiled["query"],
-            compiled["params"],
-            temp_path
+            excel_temp = tmp.name
+        
+        excel_result = ParquetService.parquet_to_excel(
+            parquet_temp,
+            excel_temp
         )
 
-        print("EXCEL GENERATED:", temp_path)
-        print("ROWS:", result["rows"])
+        print("EXCEL GENERATED", excel_result)
 
-        object_name = f"temp/jobs/{job_id}.xlsx"
+        jobs_repo.update(job_id, {
+            "status": "excel_generated",
+            "started_at": datetime.utcnow()
+        })
+
+        object_name = f"temp/jobs/{job_id}/report-{datetime.utcnow()}.xlsx"
+        #object_name = f"temp/jobs/{job_id}.parquet"
 
         upload_result = minio_repo.upload_file(
-            temp_path,
+            excel_temp,
             object_name
         )
+
         print("MINIO RESULT:", upload_result)
 
         jobs_repo.update(job_id, {
             "status": "success",
-            "result_path": upload_result["object_name"],
+            #"result_path": upload_result["object_name"],
+            "result_path": upload_result.get("url"),
             "finished_at": datetime.utcnow()
         })
 
@@ -87,8 +116,11 @@ def execute_report_job(job_id: str):
         raise
 
     finally:
-        if temp_path and os.path.exists(temp_path):
-            os.remove(temp_path)
+        if parquet_temp and os.path.exists(parquet_temp):
+            os.remove(parquet_temp)
+
+        if excel_temp and os.path.exists(excel_temp):
+            os.remove(excel_temp)
 
         db.close()
 
