@@ -13,7 +13,8 @@ class ParquetService:
         workbook = xlsxwriter.Workbook(
             excel_path,
             {
-                "constant_memory": True
+                "constant_memory": True,
+                "use_zip64": True
             }
         )
 
