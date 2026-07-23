@@ -25,7 +25,7 @@ BUCKET = os.getenv("MINIO_BUCKET", "silver")
 if not client.bucket_exists(BUCKET):
     client.make_bucket(BUCKET)
 
-    config = LifecycleConfig([
+lifecycle_config = LifecycleConfig([
         LifecycleConfig.Rule(
             status=Status.ENABLED,
             rule_filter=Filter(prefix="temp/"),
@@ -34,4 +34,8 @@ if not client.bucket_exists(BUCKET):
         )
     ])
 
-    client.set_bucket_lifecycle(BUCKET, config)
+try:
+    client.set_bucket_lifecycle(BUCKET, lifecycle_config)
+    print(f"Regla LifeCycle 'temp/' aplicada correctamente al bucket '{BUCKET}'")
+except Exception as e:
+    print(f'Error al configurar el Lifecycle en MinIO: {e}')

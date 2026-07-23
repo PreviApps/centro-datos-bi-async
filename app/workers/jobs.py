@@ -1,4 +1,5 @@
 from datetime import datetime
+import pyarrow.parquet as pq
 import tempfile
 import os
 import uuid
@@ -64,6 +65,16 @@ def execute_report_job(job_id: str):
 
         print("PARQUET GENERATED:", parquet_result)
 
+        parquet = pq.ParquetFile(parquet_temp)
+        
+        print("=======================================")
+        print("PARQUET INFO")
+        print("Filas", parquet.metadata.num_rows)
+        print("Filas", parquet.metadata.num_columns)
+        print("Filas", parquet.metadata.num_row_groups)
+        print("Filas", os.path.getsize(parquet_temp) / (1024**2), "MB")
+        print("=======================================")
+
         jobs_repo.update(job_id, {
             "status": "parquet_generated",
             "started_at": datetime.utcnow()
@@ -100,8 +111,7 @@ def execute_report_job(job_id: str):
 
         jobs_repo.update(job_id, {
             "status": "success",
-            #"result_path": upload_result["object_name"],
-            "result_path": upload_result.get("url"),
+            "result_path": upload_result["object_name"],
             "finished_at": datetime.utcnow()
         })
 
