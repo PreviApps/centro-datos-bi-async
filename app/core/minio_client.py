@@ -1,8 +1,8 @@
 import os
 from minio import Minio
-from minio.lifecycleconfig import LifecycleConfig
-from minio.commonconfig import Filter
-from minio.replicationconfig import Status
+from minio.lifecycleconfig import LifecycleConfig, Rule, Expiration
+from minio.commonconfig import Filter, ENABLED
+#from minio.replicationconfig import Status
 import urllib3
 
 timeout_config = urllib3.Timeout(connect=5.0, read=15.0)
@@ -26,11 +26,11 @@ if not client.bucket_exists(BUCKET):
     client.make_bucket(BUCKET)
 
 lifecycle_config = LifecycleConfig([
-        LifecycleConfig.Rule(
-            status=Status.ENABLED,
+        Rule(
+            status=ENABLED,
             rule_filter=Filter(prefix="temp/"),
             rule_id="delete-temp-files",
-            expiration=LifecycleConfig.Expiration(days=1),
+            expiration=Expiration(days=1),
         )
     ])
 

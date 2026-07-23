@@ -11,7 +11,7 @@ services:
     depends_on:
       - redis
       - minio
-      - postgres
+      #- postgres
     environment:
       PYTHONUNBUFFERED: "1"
       REDIS_HOST: redis
@@ -27,11 +27,11 @@ services:
       MINIO_SECRET_KEY: Previ.2024**
       MINIO_BUCKET: silver
 
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: host.docker.internal
       POSTGRES_PORT: 5432
-      POSTGRES_DB: app_db
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: centro-datos-bi-v2
+      POSTGRES_USER: db_dev
+      POSTGRES_PASSWORD: Pr3v1-2026.dev*
 
     env_file:
       - .env
@@ -51,7 +51,7 @@ services:
     command: python -m app.workers.worker
     depends_on:
       - redis
-      - postgres
+      #- postgres
     environment:
       PYTHONUNBUFFERED: "1"
       REDIS_HOST: redis
@@ -67,27 +67,27 @@ services:
       MINIO_SECRET_KEY: Previ.2024**
       MINIO_BUCKET: silver
 
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: host.docker.internal
       POSTGRES_PORT: 5432
-      POSTGRES_DB: app_db
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: app_password
+      POSTGRES_DB: centro-datos-bi-v2
+      POSTGRES_USER: db_dev
+      POSTGRES_PASSWORD: Pr3v1-2026.dev*
     env_file:
       - .env
   
-  postgres:
-    image: postgres:17
-    container_name: postgres_db
-    restart: always
-    ports:
+  #postgres:
+  #  image: postgres:17
+   # container_name: postgres_db
+    #restart: always
+    #ports:
       #- "5432:5432"
-      - "5433:5432"
-    environment:
-      POSTGRES_DB: app_db
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: app_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    #  - "5433:5432"
+    #environment:
+    #  POSTGRES_DB: app_db
+     # POSTGRES_USER: app_user
+      #POSTGRES_PASSWORD: app_password
+    #volumes:
+     # - postgres_data:/var/lib/postgresql/data
       #- ./init-scripts:/docker-entrypoint-initdb.d
   
   minio:
@@ -107,6 +107,3 @@ services:
       - ./config:/root/.minio
     command: server /data --console-address ":9001"
     restart: always
-
-volumes:
-  postgres_data:
