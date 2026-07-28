@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 4008
 
-CMD ["npm", "run", "dev", "--", "--host"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "4008"]
