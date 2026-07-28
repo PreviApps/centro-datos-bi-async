@@ -1,6 +1,6 @@
 from app.api.schemas.path import PathRequest
 from app.api.schemas.query import QueryRequest
-from app.api.schemas.report import ExecuteReportRequest, ReportCreate
+from app.api.schemas.report import ExecuteReportRequest, ReportCreate, ReportUpdate
 from app.core.database_client import SessionLocal
 from app.providers.reports_providers import get_reports_service
 from app.repositories.minio_repository import MinioRepository
@@ -22,6 +22,21 @@ async def get_reports(service: ReportsService = Depends(get_reports_service)):
 @router.get("/{report_id}")
 async def report_detail(report_id: str, service: ReportsService = Depends(get_reports_service)):
     return service.get_report(report_id)
+
+@router.patch("/edit_report/{report_id}")
+async def update_report(
+    report_id: str, 
+    body: ReportUpdate, 
+    service: ReportsService = Depends(get_reports_service)
+):
+    return service.update_report(report_id, body)
+
+@router.delete("/delete_report/{report_id}")
+async def delete_report(
+    report_id: str, 
+    service: ReportsService = Depends(get_reports_service)
+):
+    return service.delete_report(report_id)
 
 @router.post("/list_tables")
 async def list_tables(body: PathRequest):

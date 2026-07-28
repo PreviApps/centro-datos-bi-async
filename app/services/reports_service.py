@@ -6,7 +6,7 @@ from app.services.report_query_builder import ReportQueryBuilder
 from app.workers.jobs import execute_preview_job, execute_query_job, execute_report_job
 from fastapi import HTTPException
 
-from app.api.schemas.report import ReportCreate
+from app.api.schemas.report import ReportCreate, ReportUpdate
 from app.repositories.reports_repository import ReportsRepository
 
 
@@ -46,6 +46,48 @@ class ReportsService:
         self._validate_parameters(report)
 
         return self.repo.create(report.model_dump())
+
+    def update_report(self, report_id: str, report_data: ReportUpdate):
+        # 1. Verificar si existe
+        existing_report = self.get_report(report_id)
+
+        # 2. Si se actualizan el template o los parámetros, revalidar consistencia
+        new_template = report_data.sql_template if report_data.sql_template is not None else existing_report.sql_template
+        new_params = report_data.parameters if report_data.parameters is not None else existing_report.parameters
+
+        # Construimos un objeto temporal para usar tu método `_validate_parameters`
+        temp_report = ReportCreate(
+            name=report_data.name or existing_report.name,
+            description=report_data.description or existing_report.description or "",
+            sql_template=new_template,
+            parameters=new_params,
+            created_by=report_data.created_by or str(existing_report.created_by)
+        )
+        self._validate_parameters(temp_report)
+
+        # 3. Mapear datos a diccionario serializando los objetos Pydantic internos
+        update_dict = report_data.model_dump(exclude_unset=True)
+        
+        # Convertir lista de objetos Pydantic `ReportParameter` a lista de dicts (JSONB)
+        if "parameters" in update_dict and update_dict["parameters"] is not None:
+            update_dict["parameters"] = [p.model_dump() for p in report_data.parameters]
+
+        updated_report = self.repo.update(report_id, update_dict)
+        return updated_report
+
+    def delete_report(self, report_id: str):
+        # Verificar existencia previa
+        self.get_report(report_id)
+        
+        deleted = self.repo.delete(report_id)
+        if not deleted:
+            raise HTTPException(
+                status_code=404,
+                detail="Reporte no encontrado"
+            )
+            
+        #return {"message": "Reporte eliminado exitosamente", "id": report_id}
+        return {"message": "Reporte eliminado exitosamente"}
     
     """def run_report(
         self,
@@ -161,6 +203,17 @@ class ReportsService:
 
         missing = set(found) - set(declared)
         extra = set(declared) - set(found)
+
+        duplicated = {
+            x for x in declared
+            if declared.count(x) > 1
+        }
+
+        if duplicated:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Duplicated parameters: {list(duplicated)}"
+            )
 
         if missing:
             raise HTTPException(
