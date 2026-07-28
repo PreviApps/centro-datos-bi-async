@@ -1,0 +1,15 @@
+.animate-fade-slide {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all .3s ease;
+}
+
+.animate-fade-slide.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.animate-fade-slide.hidden {
+  opacity: 0;
+  transform: translateX(-10px);
+}
