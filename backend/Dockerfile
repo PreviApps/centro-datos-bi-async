@@ -8,6 +8,6 @@ RUN pip install --default-timeout=1000 --retries 10 --no-cache-dir -r requiremen
 
 COPY . .
 
-EXPOSE 8080
+EXPOSE 3008
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--reload", "--log-level", "debug"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "3008", "--reload", "--log-level", "debug"]

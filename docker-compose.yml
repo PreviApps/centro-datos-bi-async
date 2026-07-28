@@ -1,0 +1,68 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+    container_name: centro-datos-bi-v2-backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "3008:3008"
+    depends_on:
+      - redis
+      - minio
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    env_file:
+      - ./backend/.env
+
+  worker:
+    build: 
+      context: ./backend
+    container_name: archpat-nitrous-worker
+    command: python -m app.workers.worker
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - redis
+      - minio
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    env_file:
+      - ./backend/.env
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+  frontend:
+    build: 
+      context: ./frontend
+    container_name: centro-datos-bi-v2-frontend
+    ports:
+      - "4008:4008"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend/.env
+  
+  redis:
+    image: redis:7
+    container_name: redis
+    ports: 
+      - "6379:6379"
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio_server
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./data:/data
+      - ./config:/root/.minio
+    command: server /data --console-address ":9001"
+    restart: always
