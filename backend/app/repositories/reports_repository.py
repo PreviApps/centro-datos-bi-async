@@ -1,6 +1,7 @@
-from typing import Optional
+from typing import List, Optional
 
-from app.models.report import ReportModel
+from app.models.report import PositionReportPermission, ReportModel, UserReportPermission
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 class ReportsRepository:
@@ -57,3 +58,28 @@ class ReportsRepository:
         self.db.delete(report)
         self.db.commit()
         return True
+
+    def get_all_by_user_permissions(self, user_id: str, position_name: str) -> List[ReportModel]:
+        """
+        Consulta los reportes a los que tiene acceso el usuario,
+        ya sea directamente por su user_id o por su posición/cargo.
+        """
+        return (
+            self.db.query(ReportModel)
+            .outerjoin(
+                UserReportPermission,
+                (UserReportPermission.report_id == ReportModel.id) & (UserReportPermission.user_id == user_id)
+            )
+            .outerjoin(
+                PositionReportPermission,
+                (PositionReportPermission.report_id == ReportModel.id) & (PositionReportPermission.position_name == position_name)
+            )
+            .filter(
+                or_(
+                    UserReportPermission.report_id.is_not(None),
+                    PositionReportPermission.report_id.is_not(None)
+                )
+            )
+            .distinct()
+            .all()
+        )

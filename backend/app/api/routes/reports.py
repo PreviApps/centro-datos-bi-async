@@ -23,6 +23,17 @@ async def get_reports(service: ReportsService = Depends(get_reports_service)):
 async def report_detail(report_id: str, service: ReportsService = Depends(get_reports_service)):
     return service.get_report(report_id)
 
+@router.get("/by_user/{user_id}")
+async def get_my_reports(
+    user_id: str, 
+    position_name: str = None,
+    service: ReportsService = Depends(get_reports_service)
+):
+    """
+    Retorna solo los reportes a los que el usuario específico tiene permiso otorgado.
+    """
+    return service.get_reports_for_user(user_id, position_name)
+
 @router.patch("/edit_report/{report_id}")
 async def update_report(
     report_id: str, 

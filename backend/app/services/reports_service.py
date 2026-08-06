@@ -41,6 +41,23 @@ class ReportsService:
             for report in reports
         ]
 
+    def get_reports_for_user(self, user_id: str, position_name: str = None):
+        """
+        Retorna la lista formateada de reportes permitidos para un usuario y cargo.
+        """
+        reports = self.repo.get_all_by_user_permissions(user_id, position_name)
+        return [
+            {
+                "id": str(report.id),
+                "name": report.name,
+                "description": report.description,
+                "created_by": str(report.created_by),
+                "created_at": report.created_at,
+                "parameters_count": len(report.parameters) if report.parameters else 0
+            }
+            for report in reports
+        ]
+
     def create_report(self, report: ReportCreate):
 
         self._validate_parameters(report)
@@ -226,3 +243,18 @@ class ReportsService:
                 status_code=400,
                 detail=f"Unused parameters in schema: {list(extra)}"
             )
+
+    def verify_user_access(self, report_id: str, user_id: str, position_name: str) -> bool:
+        """
+        Método de apoyo para validar antes de ejecutar un reporte específico.
+        """
+        report = self.get_report(report_id) # Lanza 404 si no existe
+        permitted_reports = self.repo.get_all_by_user_permissions(user_id, position_name)
+        
+        permitted_ids = [str(r.id) for r in permitted_reports]
+        if str(report.id) not in permitted_ids:
+            raise HTTPException(
+                status_code=403,
+                detail="No tienes permisos para acceder o ejecutar este reporte"
+            )
+        return True
