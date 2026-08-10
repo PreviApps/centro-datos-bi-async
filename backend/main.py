@@ -9,6 +9,7 @@ app = FastAPI()
 
 # Configuración de orígenes permitidos (replicando la seguridad de los proyectos en NestJS)
 origins = [
+    "https://centro-datos-bi-v2.previsalud.com.co",
     "http://10.10.119.97:4008",
     "http://10.10.119.45:4008",
     "https://previsalud.com.co",
