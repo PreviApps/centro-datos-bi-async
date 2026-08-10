@@ -4,7 +4,8 @@ import {
   getReports,
   getReport,
   runReport,
-  deleteReport
+  deleteReport,
+  getReportsByUser
 } from "../api/reports"
 
 import { getJob } from "../api/jobs";
@@ -18,10 +19,13 @@ import CustomNavbar from "./common/custom_navbar/CustomNavbar";
 import CustomMainContent from "./common/custom_main_content/CustomMainContent";
 import { useNavigate } from "react-router-dom";
 import { ChartMixed } from "@gravity-ui/icons";
+import { useAuth } from "../context/AuthContext";
 
 export default function ReportsPage() {
 
   const navigate = useNavigate();
+
+  const { user } = useAuth(); //<--- Obtén el usuario logueado actual
 
   const [reports, setReports] = useState<any[]>([]);
   const [selectedReport, setSelectedReport] = useState<any>(null);
@@ -32,15 +36,18 @@ export default function ReportsPage() {
   const [paramValues, setParamValues] = useState<Record<string, any>>({});
 
   useEffect(() => {
-    loadReports();
-  }, []);
+    // Asegúrate de que exista el ID del usuario antes de buscar sus reportes
+    if (user?.id) {
+      loadReports(user.id);
+    }
+  }, [user]);
 
-  async function loadReports() {
+  async function loadReports(userId: string) {
     setFetchingReports(true);
     try {
       const data = await ToastService.execute({
-        action: getReports,
-        loading: "Cargando reportes...",
+        action: ()=> getReportsByUser(userId, user.collaborator_position_name),
+        loading: "Cargando tus reportes asignados...",
         success: () => "Reportes cargados",
         error: "No fue posible cargar los reportes"
       });
@@ -126,7 +133,7 @@ export default function ReportsPage() {
 
       setIsModalOpen(false);
 
-      loadReports();
+      if (user?.id) loadReports(user.id);
 
     } catch (err) {
 

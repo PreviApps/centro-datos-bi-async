@@ -17,6 +17,11 @@ const menu = [
     route: "/boards",
     disabled: true
   },
+  {
+    name: "Administrar",
+    icon: "fa-users",
+    route: "/admin"
+  },
 ];
 
 export default function Sidebar({

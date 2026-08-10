@@ -10,6 +10,15 @@ export async function getReports() {
   return response.json();
 }
 
+export async function getReportsByUser(userId: string, positionName?: string) {
+  const query = positionName ? `?position_name=${encodeURIComponent(positionName)}` : '';
+  const response = await fetch(`${BASE_URL}/by_user/${userId}${query}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch user reports");
+  }
+  return response.json();
+}
+
 export async function getReport(reportId: string) {
   const response = await fetch(`${BASE_URL}/${reportId}`);
 

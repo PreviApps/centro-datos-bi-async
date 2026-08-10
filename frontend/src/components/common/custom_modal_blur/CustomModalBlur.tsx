@@ -13,7 +13,9 @@ export function CustomModalBlur({isOpen, onOpenChange, children}: BaseModalProps
 					<Modal isOpen={isOpen} onOpenChange={onOpenChange}>
 						<Modal.Backdrop variant="blur">
 							<Modal.Container>
-								{children}
+								<Modal.Dialog>
+									{children}
+								</Modal.Dialog>
 							</Modal.Container>
 						</Modal.Backdrop>
 					</Modal>
