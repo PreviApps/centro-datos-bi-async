@@ -1,80 +1,33 @@
-from app.api.routes import reports
-from app.core.database_client import SessionLocal
-from app.repositories.minio_repository import MinioRepository
-from app.repositories.reports_repository import ReportsRepository
+from app.api.routes import reports, permissions
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from rq.job import Job
-from app.core.queue import queue
-from app.workers.jobs import sumar
 from dotenv import load_dotenv
-import uuid
-import os
 
 load_dotenv()
 
 app = FastAPI()
 
-#origins = ["http://localhost:5173"]
-origins = ["*"]
+# Configuración de orígenes permitidos (replicando la seguridad de los proyectos en NestJS)
+origins = [
+    "https://previsalud.com.co",
+    "http://localhost:4008",
+    "http://localhost:5173"
+]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    # Expresión regular para permitir cualquier subdominio de previsalud y cualquier puerto de localhost
+    allow_origin_regex=r"https://.*\.previsalud\.com\.co|http://localhost(:\d+)?",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "x-api-key"]
 )
 
 app.include_router(reports.router)
+app.include_router(permissions.router)
 
-#@app.get("/")
-#async def root():
- #   return "Hola FastAPI"#
-
-"""@app.get("/")
-async def enqueue():
-    job = queue.enqueue(sumar, 2, 3)
-    minio_repository = MinioRepository()
-    list_buckets = await minio_repository.list_buckets()
-    for bucket in list_buckets:
-        print(bucket.name, bucket.creation_date)
-    
-    db = SessionLocal()
-
-    repo = ReportsRepository(db)
-    repo.create({
-        "name": "Ventas",
-        "description": "Reporte ventas",
-        "parquet_path": "reports/ventas.parquet",
-        "sql_template": "SELECT * FROM sales",
-        "parameters": {
-            "year": 2026
-        },
-        "created_by": uuid.uuid4()
-    })
-    result_db = repo.get_all()
-    return {"job_id": job.id,
-            "reports": result_db}"""
-
-
-@app.get("/job/{job_id}")
-def get_job(job_id: str):
-
-    try:
-        job = Job.fetch(job_id, connection=queue.connection)
-    except:
-        raise ValueError("Job no encontrado")
-
-    return {
-        "id": job.id,
-        "status": job.get_status(),
-        "result": job.result
-    }
-
-
-@app.post("/query")
+'''@app.post("/query")
 async def execute_query(query_body: dict):
     
     from app.core.minio_client import client, BUCKET
@@ -125,4 +78,4 @@ async def execute_query(query_body: dict):
             "result": result.to_dict(orient="records")
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))'''
