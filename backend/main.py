@@ -20,8 +20,8 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    # Expresión regular para permitir cualquier subdominio de previsalud y cualquier puerto de localhost
-    allow_origin_regex=r"https://.*\.previsalud\.com\.co|http://(localhost|10\.10\.119\.45)(:\d+)?",
+    # Permite cualquier subdominio de previsalud.com.co y los entornos locales/IPs especificados
+    allow_origin_regex=r"https://([a-zA-Z0-9-]+\.)*previsalud\.com\.co|http://(localhost|10\.10\.119\.(45|97))(:\d+)?",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "x-api-key"]
