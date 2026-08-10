@@ -9,6 +9,8 @@ app = FastAPI()
 
 # Configuración de orígenes permitidos (replicando la seguridad de los proyectos en NestJS)
 origins = [
+    "http://10.10.119.97:4008",
+    "http://10.10.119.45:4008",
     "https://previsalud.com.co",
     "http://localhost:4008",
     "http://localhost:5173"
@@ -18,7 +20,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     # Expresión regular para permitir cualquier subdominio de previsalud y cualquier puerto de localhost
-    allow_origin_regex=r"https://.*\.previsalud\.com\.co|http://localhost(:\d+)?",
+    allow_origin_regex=r"https://.*\.previsalud\.com\.co|http://(localhost|10\.10\.119\.45)(:\d+)?",
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "x-api-key"]
