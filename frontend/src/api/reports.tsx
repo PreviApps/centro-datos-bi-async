@@ -1,7 +1,7 @@
 import { BASE_URL } from "../environments/URL";
 
 export async function getReports() {
-  const response = await fetch(`${BASE_URL}`);
+  const response = await fetch(`${BASE_URL}reports`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch reports");
@@ -12,7 +12,7 @@ export async function getReports() {
 
 export async function getReportsByUser(userId: string, positionName?: string) {
   const query = positionName ? `?position_name=${encodeURIComponent(positionName)}` : '';
-  const response = await fetch(`${BASE_URL}/by_user/${userId}${query}`);
+  const response = await fetch(`${BASE_URL}reports/by_user/${userId}${query}`);
   if (!response.ok) {
     throw new Error("Failed to fetch user reports");
   }
@@ -20,7 +20,7 @@ export async function getReportsByUser(userId: string, positionName?: string) {
 }
 
 export async function getReport(reportId: string) {
-  const response = await fetch(`${BASE_URL}/${reportId}`);
+  const response = await fetch(`${BASE_URL}reports/${reportId}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch report");
@@ -30,7 +30,7 @@ export async function getReport(reportId: string) {
 }
 
 export async function updateReport(reportId: string, payload: any){
-  const response = await fetch(`${BASE_URL}/edit_report/${reportId}`,
+  const response = await fetch(`${BASE_URL}reports/edit_report/${reportId}`,
     {
       method: "PATCH",
       headers: {
@@ -48,7 +48,7 @@ export async function updateReport(reportId: string, payload: any){
 }
 
 export async function deleteReport(reportId: string){
-  const response = await fetch(`${BASE_URL}/delete_report/${reportId}`,
+  const response = await fetch(`${BASE_URL}reports/delete_report/${reportId}`,
     {
       method: "DELETE"
     }
@@ -67,7 +67,7 @@ export async function runReport(
 ) {
 
   const response = await fetch(
-    `${BASE_URL}/${reportId}/run`,
+    `${BASE_URL}reports/${reportId}/run`,
     {
       method: "POST",
       headers: {

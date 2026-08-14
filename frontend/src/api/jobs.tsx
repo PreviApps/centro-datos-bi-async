@@ -6,7 +6,7 @@ export async function runJob(
 ) {
 
   const response = await fetch(
-    `${BASE_URL}/${reportId}/run`,
+    `${BASE_URL}reports/${reportId}/run`,
     {
       method: "POST",
       headers: {
@@ -26,7 +26,7 @@ export async function runJob(
 }
 
 export async function getJob(jobId: string) {
-    const response = await fetch(`${BASE_URL}/jobs/${jobId}`);
+    const response = await fetch(`${BASE_URL}reports/jobs/${jobId}`);
 
     if (!response.ok) {
         throw new Error("Error fetching job");

@@ -2,7 +2,7 @@ import { BASE_URL } from "../environments/URL"
 
 
 export async function executeQuery(query) {
-  const res = await fetch(`${BASE_URL}/execute_query`, {
+  const res = await fetch(`${BASE_URL}reports/execute_query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -22,7 +22,7 @@ export async function executeQuery(query) {
 }
 
 export async function saveQuery(query){
-  const res = await fetch(`${BASE_URL}/save_query`, {
+  const res = await fetch(`${BASE_URL}reports/save_query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

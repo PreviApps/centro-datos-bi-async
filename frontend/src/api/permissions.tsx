@@ -1,7 +1,7 @@
 import { BASE_URL } from "../environments/URL";
 
 export async function getReportUsersWithPermissions(reportId: string) {
-  const response = await fetch(`${BASE_URL}/${reportId}/users_with_permissions`);
+  const response = await fetch(`${BASE_URL}reports/${reportId}/users_with_permissions`);
   if (!response.ok) {
     throw new Error("Failed to fetch users with permissions");
   }
@@ -9,7 +9,7 @@ export async function getReportUsersWithPermissions(reportId: string) {
 }
 
 export async function getReportPermissions(reportId: string) {
-  const response = await fetch(`${BASE_URL}/${reportId}/permissions`);
+  const response = await fetch(`${BASE_URL}reports/${reportId}/permissions`);
   if (!response.ok) {
     throw new Error("Failed to fetch permissions");
   }
@@ -20,7 +20,7 @@ export async function updateReportPermissions(
   reportId: string, 
   payload: { user_ids: string[]; position_names: string[]; admin_user_id: string }
 ) {
-  const response = await fetch(`${BASE_URL}/${reportId}/permissions`, {
+  const response = await fetch(`${BASE_URL}reports/${reportId}/permissions`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json"

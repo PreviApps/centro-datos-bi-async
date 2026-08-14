@@ -3,7 +3,7 @@ import { BASE_URL } from "../environments/URL";
 export async function previewParquet(path) {
 
   const res = await fetch(
-    `${BASE_URL}/preview`,
+    `${BASE_URL}reports/preview`,
     {
       method: "POST",
       headers: {

@@ -8,7 +8,7 @@ export interface ListTablesResponse {
 export async function listTables(
   path: string = ""
 ): Promise<ListTablesResponse> {
-  const res = await fetch(`${BASE_URL}/list_tables`, {
+  const res = await fetch(`${BASE_URL}reports/list_tables`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
