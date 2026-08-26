@@ -7,59 +7,62 @@ import { CustomTabs, TabItem } from "../common/custom_tabs/CustomTabs";
 import { Button, Checkbox, SearchField } from "@heroui/react";
 import { ToastService } from "../../utils/ToastService";
 import { getReports } from "../../api/reports";
-import { getReportUsersWithPermissions, updateReportPermissions } from "../../api/permissions";
+import { getBoards } from "../../api/boards";
+import {
+	getReportUsersWithPermissions,
+	updateReportPermissions,
+	getBoardUsersWithPermissions,
+	updateBoardPermissions
+} from "../../api/permissions";
 
 export default function AdminContent() {
-	const [reportsAndBoards, setReportsAndBoards] = useState<any[]>([]);
-	const [fetchingReports, setFetchingReports] = useState(true);
+	const [reports, setReports] = useState<any[]>([]);
+	const [boards, setBoards] = useState<any[]>([]);
+	const [fetchingItems, setFetchingItems] = useState(true);
+	const [activeTab, setActiveTab] = useState<"reports" | "boards">("reports");
+
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [selectedItem, setSelectedItem] = useState<any>(null);
 	const [searchQuery, setSearchQuery] = useState("");
 
-	// Lista de usuarios real que viene del SSO cruzada con la BD
 	const [allUsers, setAllUsers] = useState<any[]>([]);
 	const [grantedUsers, setGrantedUsers] = useState<string[]>([]);
 
 	useEffect(() => {
-		loadReports();
+		loadData();
 	}, []);
 
-	async function loadReports() {
-		setFetchingReports(true);
+	async function loadData() {
+		setFetchingItems(true);
 		try {
-			const data = await ToastService.execute({
-				action: getReports,
-				loading: "Cargando reportes...",
-				success: () => "Reportes cargados",
-				error: "No fue posible cargar los reportes"
-			});
-			setReportsAndBoards(data || []);
+			const reportsData = await getReports();
+			const boardsData = await getBoards();
+			setReports(reportsData || []);
+			setBoards(boardsData || []);
 		} catch (error) {
-			console.error("ERROR LOADING REPORTS:", error);
-			setReportsAndBoards([]);
+			console.error("ERROR LOADING ADMIN DATA:", error);
 		} finally {
-			setFetchingReports(false);
+			setFetchingItems(false);
 		}
 	}
 
-	const handleCardClick = async (item: any) => {
+	const handleCardClick = async (item: any, type: "reports" | "boards") => {
+		setActiveTab(type);
 		setSelectedItem(item);
 		setSearchQuery("");
 
 		try {
-			// 1. Obtenemos el arreglo completo con la estructura unificada del backend
+			const fetchFn = type === "reports" ? getReportUsersWithPermissions : getBoardUsersWithPermissions;
 			const usersList = await ToastService.execute({
-				action: () => getReportUsersWithPermissions(item.id),
+				action: () => fetchFn(item.id),
 				loading: "Cargando usuarios y permisos...",
 				success: "Datos cargados",
 				error: "No fue posible obtener los accesos"
 			});
 
-			// 2. Guardamos la lista completa para el buscador y el renderizado
 			setAllUsers(usersList || []);
 
-			// 3. Extraemos de forma automática los IDs que ya tengan permiso activo
 			const initialGranted = (usersList || [])
 				.filter((u: any) => u.has_permission)
 				.map((u: any) => u.id);
@@ -82,12 +85,14 @@ export default function AdminContent() {
 
 		setLoading(true);
 		try {
+			const updateFn = activeTab === "reports" ? updateReportPermissions : updateBoardPermissions;
+
 			await ToastService.execute({
 				action: () =>
-					updateReportPermissions(selectedItem.id, {
+					updateFn(selectedItem.id, {
 						user_ids: grantedUsers,
-						position_names: [], // Aquí puedes mapear cargos si lo integras después
-						admin_user_id: "admin-sso-id" // ID del administrador logueado
+						position_names: [],
+						admin_user_id: "admin-sso-id"
 					}),
 				loading: "Guardando asignaciones...",
 				success: "Permisos actualizados correctamente",
@@ -102,7 +107,6 @@ export default function AdminContent() {
 		}
 	};
 
-	// Filtrado reactivo sobre la lista real del SSO
 	const filteredUsers = allUsers.filter((user) => {
 		const query = searchQuery.toLowerCase();
 		const matchName = user.name?.toLowerCase().includes(query) || false;
@@ -115,17 +119,17 @@ export default function AdminContent() {
 			id: "reports",
 			label: "Reportes",
 			showSeparator: false,
-			content: fetchingReports ? (
+			content: fetchingItems ? (
 				<p className="text-center py-8">Cargando reportes...</p>
 			) : (
 				<CustomGridCard
-					items={reportsAndBoards}
+					items={reports}
 					renderItem={(item) => ({
 						id: item.id,
 						title: item.name,
 						description: item.description,
 					})}
-					onItemClick={handleCardClick}
+					onItemClick={(item) => handleCardClick(item, "reports")}
 				/>
 			),
 		},
@@ -133,10 +137,18 @@ export default function AdminContent() {
 			id: "boards",
 			label: "Tableros",
 			showSeparator: true,
-			content: (
-				<div className="flex flex-col items-center justify-center py-12">
-					<p className="text-zinc-400">Próximamente tableros.</p>
-				</div>
+			content: fetchingItems ? (
+				<p className="text-center py-8">Cargando tableros...</p>
+			) : (
+				<CustomGridCard
+					items={boards}
+					renderItem={(item) => ({
+						id: item.id,
+						title: item.name,
+						description: item.description,
+					})}
+					onItemClick={(item) => handleCardClick(item, "boards")}
+				/>
 			),
 		},
 	];
@@ -174,7 +186,7 @@ export default function AdminContent() {
 							<h2 className="text-xl font-bold">Asignar Permisos</h2>
 							{selectedItem && (
 								<p className="text-sm text-zinc-500">
-									Configurando accesos para: <span className="font-semibold text-primary">{selectedItem.name}</span>
+									Configurando accesos para ({activeTab === "reports" ? "Reporte" : "Tablero"}): <span className="font-semibold text-primary">{selectedItem.name}</span>
 								</p>
 							)}
 						</div>
@@ -189,7 +201,6 @@ export default function AdminContent() {
 							</SearchField>
 						</div>
 
-						{/* Checkbox global para seleccionar o deseleccionar los elementos filtrados */}
 						{filteredUsers.length > 0 && (
 							<div className="flex items-center px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-800 flex-shrink-0">
 								{(() => {
@@ -236,8 +247,7 @@ export default function AdminContent() {
 										<div
 											key={user.id}
 											onClick={() => toggleUserGrant(user.id)}
-											className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${isChecked ? "border-primary bg-primary/5" : "border-zinc-200 dark:border-zinc-800"
-												}`}
+											className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${isChecked ? "border-primary bg-primary/5" : "border-zinc-200 dark:border-zinc-800"}`}
 										>
 											<div className="flex flex-col pointer-events-none">
 												<span className="font-semibold text-sm">{user.name}</span>

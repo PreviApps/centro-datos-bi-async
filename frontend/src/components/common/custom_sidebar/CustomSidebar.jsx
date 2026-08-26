@@ -14,8 +14,7 @@ const menu = [
   {
     name: "Tableros",
     icon: "fa-users",
-    route: "/boards",
-    disabled: true
+    route: "/boards"
   },
   {
     name: "Administrar",

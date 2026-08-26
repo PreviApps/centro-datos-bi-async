@@ -12,11 +12,13 @@ import { getJob } from '../../api/jobs';
 import DataTableCard from '../../utils/DataTableCard';
 import { useLocation } from 'react-router-dom';
 import { getReport } from '../../api/reports';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ReportsContent() {
 
 	const location = useLocation();
 	const editingReportId = location.state?.reportId || null;
+	const { user } = useAuth();
 
 	const [reportToEdit, setReportToEdit] = useState<any>(null);
 	const [isLoadingReport, setIsLoadingReport] = useState<boolean>(false);
@@ -47,7 +49,7 @@ export default function ReportsContent() {
 			setIsLoadingReport(true);
 			const reportData = await getReport(id);
 			console.log("REPORTE A EDITAR", reportData);
-			setReportToEdit(reportData);
+			setReportToEdit({...reportData, created_by: reportData.created_by || user?.id});
 		} catch (error) {
 			console.error("Error cargando el reporte para editar", error);
 		}finally{
@@ -156,7 +158,7 @@ export default function ReportsContent() {
 					</Card.Header>
 
 					<Card.Content>
-						<SqlEditor initialValue={reportToEdit?.sql_template || reportToEdit?.query || ''} setSqlPreview={setSqlPreview} setIsQueryLoading={setIsQueryLoading} reportToEdit={reportToEdit}/>
+						<SqlEditor initialValue={reportToEdit?.sql_template || reportToEdit?.query || ''} setSqlPreview={setSqlPreview} setIsQueryLoading={setIsQueryLoading} reportToEdit={reportToEdit} currentUserId={user?.id}/>
 					</Card.Content>
 				</Card.Root>
 

@@ -17,7 +17,7 @@ export async function getReportPermissions(reportId: string) {
 }
 
 export async function updateReportPermissions(
-  reportId: string, 
+  reportId: string,
   payload: { user_ids: string[]; position_names: string[]; admin_user_id: string }
 ) {
   const response = await fetch(`${BASE_URL}reports/${reportId}/permissions`, {
@@ -30,6 +30,41 @@ export async function updateReportPermissions(
 
   if (!response.ok) {
     throw new Error("Failed to update permissions");
+  }
+
+  return response.json();
+}
+
+export async function getBoardUsersWithPermissions(boardId: string) {
+  const response = await fetch(`${BASE_URL}boards/${boardId}/users_with_permissions`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch board users with permissions");
+  }
+  return response.json();
+}
+
+export async function getBoardPermissions(boardId: string) {
+  const response = await fetch(`${BASE_URL}boards/${boardId}/permissions`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch board permissions");
+  }
+  return response.json();
+}
+
+export async function updateBoardPermissions(
+  boardId: string,
+  payload: { user_ids: string[]; position_names: string[]; admin_user_id: string }
+) {
+  const response = await fetch(`${BASE_URL}boards/${boardId}/permissions`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update board permissions");
   }
 
   return response.json();

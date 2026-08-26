@@ -16,7 +16,7 @@ loader.init().then((monacoInstance) => {
   monacoInstance.languages.register({ id: "sql" });
 });
 
-function SqlEditor({ setSqlPreview, setIsQueryLoading, initialValue = '', reportToEdit = null }) {
+function SqlEditor({ setSqlPreview, setIsQueryLoading, initialValue = '', reportToEdit = null, currentUserId = '' }) {
   const [query, setQuery] = useState("");
   const [currentPath, setCurrentPath] = useState(""); // path actual del MinIO
   const [sqlError, setSqlError] = useState(null);
@@ -25,7 +25,7 @@ function SqlEditor({ setSqlPreview, setIsQueryLoading, initialValue = '', report
     name: "",
     description: "",
     parquet_path: "",
-    created_by: ""
+    created_by: currentUserId
   })
   const initialReport = useMemo(() => ({
     name: reportToEdit?.name ?? "",
@@ -46,11 +46,13 @@ function SqlEditor({ setSqlPreview, setIsQueryLoading, initialValue = '', report
         name: reportToEdit.name || "",
         description: reportToEdit.description || "",
         parquet_path: reportToEdit.parquet_path || "",
-        created_by: reportToEdit.created_by || ""
+        created_by: reportToEdit.created_by || currentUserId || ""
       });
+    } else if (currentUserId) {
+      setReportData(prev => ({ ...prev, created_by: currentUserId }));
     }
 
-  }, [initialValue, reportToEdit]);
+  }, [initialValue, reportToEdit, currentUserId]);
 
   useEffect(() => {
     loader.init().then((monacoInstance) => {
@@ -181,15 +183,28 @@ function SqlEditor({ setSqlPreview, setIsQueryLoading, initialValue = '', report
   };
 
   const handleSaveQuery = () => {
-    setIsSaveModalOpen(true)
+    if (!reportToEdit?.id) {
+      setReportData(prev => ({
+        ...prev,
+        name: "",
+        description: "",
+        created_by: currentUserId
+      }));
+    }
+    setIsSaveModalOpen(true);
   };
 
   const handleEdit = (payload) => {
 
     const isEditing = Boolean(reportToEdit?.id);
 
+    const finalPayload = {
+      ...payload,
+      created_by: payload.created_by || currentUserId
+    };
+
     ToastService.execute({
-      action: () => isEditing ? updateReport(reportToEdit.id, payload) : saveQuery(payload),
+      action: () => isEditing ? updateReport(reportToEdit.id, finalPayload) : saveQuery(finalPayload),
       loading: isEditing ? 'Actualizando reporte...' : "Saving query...",
       //success: isEditing? 'Reporte actualizado con éxito' : "Query saved successfully",
       success: () => {

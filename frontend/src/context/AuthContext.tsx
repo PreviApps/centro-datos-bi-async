@@ -14,6 +14,11 @@ interface AuthContextType {
 
 // Credenciales simuladas de usuario logueado para desarrollo/pruebas
 const MOCK_LOGGED_USER: UserSession = {
+    //id: 'e73f2b79-50e9-4504-8a00-be8548b71458', //GUIDO
+/*id : "2c849636-a18a-448d-b248-50ec8ccc3d6a", //ALVARO
+name: "ALVARO JAVIER",
+corporate_email: "alvaro.merino@previsalud.com.co",
+collaborator_position_name: "JEFE DE APLICACIONES TECNOLOGICAS",*/
   id: "f4d48315-f61c-41b0-a6f3-82898e73d7f2", 
   name: "SERGIO DAVID",
   corporate_email: "sergio.lema@previsalud.com.co",

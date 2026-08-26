@@ -19,31 +19,6 @@ export function SaveQueryModal({
   canSave
 }) {
 
-  /*useEffect(() => {
-    if (!open) return;
-
-    setReportData(prev => ({
-      ...prev,
-      name: "",
-      description: "",
-      created_by: "550e8400-e29b-41d4-a716-446655440000"
-    }));
-  }, [open]);*/
-
-  useEffect(() => {
-
-    if (!open) return;
-
-    if (reportData?.id) return;
-
-    setReportData({
-      name: "",
-      description: "",
-      created_by: "550e8400-e29b-41d4-a716-446655440000"
-    });
-
-  }, [open]);
-
   const handleSubmit = () => {
     const matches = query.matchAll(
       /@\(([a-zA-Z0-9_]+):(string|date|number|boolean)\)/g

@@ -25,7 +25,7 @@ export default function ReportsPage() {
 
   const navigate = useNavigate();
 
-  const { user } = useAuth(); //<--- Obtén el usuario logueado actual
+  const { user } = useAuth();
 
   const [reports, setReports] = useState<any[]>([]);
   const [selectedReport, setSelectedReport] = useState<any>(null);
