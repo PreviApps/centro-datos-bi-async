@@ -50,6 +50,12 @@ export default function BoardViewerPage() {
 		);
 	}
 
+	const sanitizeEmbedUrl = (url: string) => {
+		if (!url) return '';
+		// Convierte http a https en producción
+		return url.replace(/^http:\/\//i, 'https://');
+	};
+
 	return (
 		<div className="flex flex-col h-screen overflow-hidden">
 			{/*<CustomNavbar title={board.name}>
@@ -69,7 +75,7 @@ export default function BoardViewerPage() {
 					</div>
 
 					{/* CONTENEDOR CON RELATIVE PARA QUE EL ESCUDO NO SE SALGA */}
-					<div className="flex-1 w-full bg-default-50 border border-default-200 rounded-xl overflow-hidden shadow-sm flex flex-col relative">
+					<div className="flex-1 w-full bg-default-50 border border-default-200 rounded-xl overflow-hidden shadow-sm flex flex-col relative min-h-0">
 
 						{/* ESCUDO TAPA-BARRA: Solo cubre el borde superior dentro de este cuadro */}
 						<div className="absolute top-0 left-0 w-full h-11 bg-default z-50 pointer-events-none" />
@@ -78,7 +84,7 @@ export default function BoardViewerPage() {
 								embedConfig={{
 									type: 'report',
 									id: board.powerbi_report_id,
-									embedUrl: board.embed_url,
+									embedUrl: sanitizeEmbedUrl(board.embed_url),
 									accessToken: board.embed_token,
 									tokenType: models.TokenType.Embed,
 									settings: {
@@ -91,10 +97,11 @@ export default function BoardViewerPage() {
 												visible: true, // Esto muestra la barra inferior con los botones de zoom y ajuste
 											},
 										},
+										navContentPaneEnabled: true,
 										background: models.BackgroundType.Transparent,
 										layoutType: models.LayoutType.Custom,
 										customLayout: {
-											displayOption: models.DisplayOption.FitToPage,
+											displayOption: models.DisplayOption.FitToWidth,
 										},
 									},
 								}}
