@@ -1,4 +1,4 @@
-from app.api.routes import reports, permissions
+from app.api.routes import reports, boards
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 app.include_router(reports.router)
-app.include_router(permissions.router)
+app.include_router(boards.router)
 
 '''@app.post("/query")
 async def execute_query(query_body: dict):

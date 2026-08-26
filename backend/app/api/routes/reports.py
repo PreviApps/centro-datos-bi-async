@@ -10,6 +10,10 @@ from app.services.jobs_service import JobsService
 from app.services.reports_service import ReportsService
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.api.schemas.permission import UpdatePermissions
+from app.providers.report_permissions_providers import get_permissions_service
+from app.services.report_permissions_service import ReportPermissionsService
+
 router = APIRouter(
     prefix = "/reports"
 )
@@ -99,3 +103,22 @@ async def get_job(job_id: str):
 
     finally:
         db.close()
+
+
+@router.get("/{report_id}/users_with_permissions")
+def get_report_users_with_permissions(
+    report_id: str,
+    service: ReportPermissionsService = Depends(get_permissions_service)
+):
+    """
+    Retorna la lista de usuarios del SSO cruzada con los permisos del reporte.
+    """
+    return service.get_report_users_with_permissions(report_id)
+
+@router.put("/{report_id}/permissions")
+def update_report_permissions(
+    report_id: str,
+    payload: UpdatePermissions,
+    service: ReportPermissionsService = Depends(get_permissions_service)
+):
+    return service.update_user_permissions(report_id, payload.user_ids, payload.admin_user_id)
