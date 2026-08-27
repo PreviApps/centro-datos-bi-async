@@ -1,4 +1,19 @@
-FROM node:22-alpine
+#FROM node:22-alpine
+
+#WORKDIR /app
+
+#COPY package*.json ./
+
+#RUN npm install
+
+#COPY . .
+
+#EXPOSE 4008
+
+#CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "4008"]
+
+
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
@@ -8,6 +23,12 @@ RUN npm install
 
 COPY . .
 
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY --from=build /app/dist /usr/share/nginx/html
+
 EXPOSE 4008
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "4008"]
+CMD ["nginx", "-g", "daemon off;"]
