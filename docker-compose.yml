@@ -39,7 +39,7 @@ services:
       context: ./frontend
     container_name: centro-datos-bi-v2-frontend
     ports:
-      - "4008:4008"
+      - "4008:80"
     volumes:
       - ./frontend:/app
       - /app/node_modules
